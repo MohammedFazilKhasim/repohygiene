@@ -13,7 +13,7 @@ import {
   printSuccess,
   printError,
   printSummary,
-  printModuleIssues
+  printModuleIssues,
 } from './ui/index.js';
 import {
   createCodeownersScanner,
@@ -90,11 +90,11 @@ program
         createDepsScanner(gitContext, config, globalOpts),
       ];
 
-      const results = await Promise.all(scanners.map(s => s.execute()));
+      const results = await Promise.all(scanners.map((s) => s.execute()));
 
       printSummary(results);
 
-      const hasErrors = results.some(r => r.status === 'failed');
+      const hasErrors = results.some((r) => r.status === 'failed');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (hasErrors && _options.failOn !== 'none') {
         process.exit(1);

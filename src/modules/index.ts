@@ -39,7 +39,4 @@ export {
 } from './branches/index.js';
 
 // Dependencies module
-export {
-  DepsScanner,
-  createDepsScanner,
-} from './deps/index.js';
+export { DepsScanner, createDepsScanner } from './deps/index.js';
