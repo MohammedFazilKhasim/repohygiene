@@ -63,7 +63,7 @@ export async function getCommitLog(
 ): Promise<CommitInfo[]> {
     const logOptions: string[] = [];
 
-    if (options?.since) {
+    if (options?.since !== undefined) {
         logOptions.push(`--since=${options.since}`);
     }
 

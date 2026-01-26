@@ -143,7 +143,7 @@ export function printHelpfulError(error: {
         }
     }
 
-    if (error.helpUrl) {
+    if (error.helpUrl !== undefined) {
         content.push('');
         content.push(chalk.dim(`Help: ${error.helpUrl}`));
     }
@@ -192,14 +192,14 @@ export function formatSarif(
                         message: {
                             text: issue.message,
                         },
-                        locations: issue.file
+                        locations: issue.file !== undefined
                             ? [
                                 {
                                     physicalLocation: {
                                         artifactLocation: {
                                             uri: issue.file,
                                         },
-                                        region: issue.line
+                                        region: issue.line !== undefined
                                             ? {
                                                 startLine: issue.line,
                                                 startColumn: issue.column ?? 1,

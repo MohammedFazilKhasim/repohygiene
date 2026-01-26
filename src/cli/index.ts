@@ -6,6 +6,7 @@ import { Command } from 'commander';
 import chalk from 'chalk';
 import { loadConfig } from '../core/config.js';
 import { initGitContext } from '../core/git.js';
+import type { GlobalOptions } from '../types/index.js';
 import {
     printHeader,
     printHelpfulError,
@@ -26,11 +27,11 @@ program
     .option('--cwd <path>', 'Working directory', process.cwd())
     .option('--json', 'Output as JSON')
     .option('--verbose', 'Verbose output')
-    .hook('preAction', async (thisCommand) => {
-        const options = thisCommand.opts();
+    .hook('preAction', (thisCommand) => {
+        const options = thisCommand.opts<GlobalOptions>();
 
         // Don't print header for JSON output
-        if (!options['json']) {
+        if (options.json !== true) {
             printHeader(VERSION);
         }
     });
@@ -43,8 +44,9 @@ program
     .description('Run all maintenance checks on the repository')
     .option('--fail-on <level>', 'Exit with error on: error, warning, any', 'error')
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             // Initialize
@@ -65,7 +67,7 @@ program
                 process.exit(1);
             }
 
-            if (config.filepath && !globalOpts['json']) {
+            if (config.filepath !== null && globalOpts.json !== true) {
                 // eslint-disable-next-line no-console
                 console.log(chalk.dim(`Using config: ${config.filepath}\n`));
             }
@@ -92,8 +94,9 @@ program
     .option('--since <date>', 'Only consider commits since date')
     .option('--output <path>', 'Output path for CODEOWNERS file')
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             const gitContext = await initGitContext(cwd);
@@ -127,8 +130,9 @@ program
     .option('--fail-on <type>', 'Fail on: unknown, restricted, any', 'restricted')
     .option('--production', 'Only check production dependencies', true)
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const _cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const _cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             // TODO: Implement license scanner
@@ -151,8 +155,9 @@ program
     .option('--exclude <patterns>', 'Glob patterns to exclude')
     .option('--include <patterns>', 'Glob patterns to include')
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const _cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const _cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             // TODO: Implement secrets scanner
@@ -177,8 +182,9 @@ program
     .option('--remote', 'Include remote branches')
     .option('--merged-only', 'Only show/delete merged branches')
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             const gitContext = await initGitContext(cwd);
@@ -212,8 +218,9 @@ program
     .option('--duplicates', 'Find duplicate dependencies')
     .option('--circular', 'Detect circular dependencies')
     .action(async (_options, command) => {
-        const globalOpts = command.parent?.opts() ?? {};
-        const _cwd = globalOpts['cwd'] ?? process.cwd();
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+        const _cwd = globalOpts.cwd ?? process.cwd();
 
         try {
             // TODO: Implement deps scanner

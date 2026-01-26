@@ -65,8 +65,8 @@ export function createIssueTable(issues: readonly Issue[]): string {
   for (const issue of issues) {
     const color = SEVERITY_COLORS[issue.severity];
     const icon = SEVERITY_ICONS[issue.severity];
-    const location = issue.file 
-      ? `${issue.file}${issue.line ? `:${issue.line}` : ''}`
+    const location = issue.file !== undefined
+      ? `${issue.file}${issue.line !== undefined ? `:${issue.line}` : ''}`
       : '-';
 
     table.push([
@@ -99,10 +99,10 @@ export function createSummaryTable(results: readonly ScanResult[]): string {
   });
 
   for (const result of results) {
-    const statusColor = result.status === 'passed' 
-      ? chalk.green 
-      : result.status === 'warning' 
-        ? chalk.yellow 
+    const statusColor = result.status === 'passed'
+      ? chalk.green
+      : result.status === 'warning'
+        ? chalk.yellow
         : result.status === 'failed'
           ? chalk.red
           : chalk.gray;
@@ -140,7 +140,7 @@ export function createKeyValueTable(
     },
   });
 
-  if (title) {
+  if (title !== undefined) {
     table.push([{ colSpan: 2, content: chalk.bold(title) }]);
   }
 
@@ -192,9 +192,9 @@ export function createLicenseTable(
  * Branch table for stale branches display
  */
 export function createBranchTable(
-  branches: readonly { 
-    name: string; 
-    daysSinceLastCommit: number; 
+  branches: readonly {
+    name: string;
+    daysSinceLastCommit: number;
     lastCommitAuthor: string;
     isMerged: boolean;
   }[]
