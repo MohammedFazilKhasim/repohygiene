@@ -33,41 +33,37 @@ export function createIssueTable(issues: readonly Issue[]): string {
   }
 
   const table = new Table({
-    head: [
-      chalk.bold(''),
-      chalk.bold('Issue'),
-      chalk.bold('Location'),
-      chalk.bold('Rule'),
-    ],
+    head: [chalk.bold(''), chalk.bold('Issue'), chalk.bold('Location'), chalk.bold('Rule')],
     style: {
       head: [],
       border: ['gray'],
     },
     chars: {
-      'top': '─',
+      top: '─',
       'top-mid': '┬',
       'top-left': '┌',
       'top-right': '┐',
-      'bottom': '─',
+      bottom: '─',
       'bottom-mid': '┴',
       'bottom-left': '└',
       'bottom-right': '┘',
-      'left': '│',
+      left: '│',
       'left-mid': '├',
-      'mid': '─',
+      mid: '─',
       'mid-mid': '┼',
-      'right': '│',
+      right: '│',
       'right-mid': '┤',
-      'middle': '│',
+      middle: '│',
     },
   });
 
   for (const issue of issues) {
     const color = SEVERITY_COLORS[issue.severity];
     const icon = SEVERITY_ICONS[issue.severity];
-    const location = issue.file !== undefined
-      ? `${issue.file}${issue.line !== undefined ? `:${issue.line}` : ''}`
-      : '-';
+    const location =
+      issue.file !== undefined
+        ? `${issue.file}${issue.line !== undefined ? `:${issue.line}` : ''}`
+        : '-';
 
     table.push([
       color(icon),
@@ -85,12 +81,7 @@ export function createIssueTable(issues: readonly Issue[]): string {
  */
 export function createSummaryTable(results: readonly ScanResult[]): string {
   const table = new Table({
-    head: [
-      chalk.bold('Module'),
-      chalk.bold('Status'),
-      chalk.bold('Issues'),
-      chalk.bold('Time'),
-    ],
+    head: [chalk.bold('Module'), chalk.bold('Status'), chalk.bold('Issues'), chalk.bold('Time')],
     style: {
       head: [],
       border: ['gray'],
@@ -99,21 +90,23 @@ export function createSummaryTable(results: readonly ScanResult[]): string {
   });
 
   for (const result of results) {
-    const statusColor = result.status === 'passed'
-      ? chalk.green
-      : result.status === 'warning'
-        ? chalk.yellow
-        : result.status === 'failed'
-          ? chalk.red
-          : chalk.gray;
+    const statusColor =
+      result.status === 'passed'
+        ? chalk.green
+        : result.status === 'warning'
+          ? chalk.yellow
+          : result.status === 'failed'
+            ? chalk.red
+            : chalk.gray;
 
-    const statusIcon = result.status === 'passed'
-      ? '✓'
-      : result.status === 'warning'
-        ? '⚠'
-        : result.status === 'failed'
-          ? '✗'
-          : '○';
+    const statusIcon =
+      result.status === 'passed'
+        ? '✓'
+        : result.status === 'warning'
+          ? '⚠'
+          : result.status === 'failed'
+            ? '✗'
+            : '○';
 
     table.push([
       chalk.cyan(result.module),
@@ -129,10 +122,7 @@ export function createSummaryTable(results: readonly ScanResult[]): string {
 /**
  * Simple key-value table
  */
-export function createKeyValueTable(
-  data: Record<string, string | number>,
-  title?: string
-): string {
+export function createKeyValueTable(data: Record<string, string | number>, title?: string): string {
   const table = new Table({
     style: {
       head: [],
@@ -171,18 +161,10 @@ export function createLicenseTable(
   });
 
   for (const pkg of licenses) {
-    const statusColor = pkg.status === 'allowed'
-      ? chalk.green
-      : pkg.status === 'denied'
-        ? chalk.red
-        : chalk.yellow;
+    const statusColor =
+      pkg.status === 'allowed' ? chalk.green : pkg.status === 'denied' ? chalk.red : chalk.yellow;
 
-    table.push([
-      pkg.name,
-      chalk.dim(pkg.version),
-      pkg.license,
-      statusColor(pkg.status),
-    ]);
+    table.push([pkg.name, chalk.dim(pkg.version), pkg.license, statusColor(pkg.status)]);
   }
 
   return table.toString();
@@ -213,11 +195,12 @@ export function createBranchTable(
   });
 
   for (const branch of branches) {
-    const daysColor = branch.daysSinceLastCommit > 180
-      ? chalk.red
-      : branch.daysSinceLastCommit > 90
-        ? chalk.yellow
-        : chalk.white;
+    const daysColor =
+      branch.daysSinceLastCommit > 180
+        ? chalk.red
+        : branch.daysSinceLastCommit > 90
+          ? chalk.yellow
+          : chalk.white;
 
     table.push([
       chalk.cyan(branch.name),
