@@ -121,7 +121,7 @@ export function generateNoticeFile(
         lines.push('');
         for (const dep of deps) {
             lines.push(`- ${dep.name} (${dep.version})`);
-            if (dep.repository) {
+            if (dep.repository !== undefined) {
                 lines.push(`  ${dep.repository}`);
             }
         }

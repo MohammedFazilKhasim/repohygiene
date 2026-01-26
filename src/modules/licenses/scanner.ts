@@ -122,9 +122,9 @@ async function getLicenseForPackage(
         let license = 'UNKNOWN';
         if (typeof packageJson.license === 'string') {
             license = packageJson.license;
-        } else if (typeof packageJson.license === 'object' && packageJson.license?.type) {
+        } else if (typeof packageJson.license === 'object' && packageJson.license?.type !== undefined) {
             license = packageJson.license.type;
-        } else if (Array.isArray(packageJson.licenses) && packageJson.licenses[0]?.type) {
+        } else if (Array.isArray(packageJson.licenses) && packageJson.licenses[0]?.type !== undefined) {
             license = packageJson.licenses[0].type;
         }
 
@@ -132,7 +132,7 @@ async function getLicenseForPackage(
         let repository: string | undefined;
         if (typeof packageJson.repository === 'string') {
             repository = packageJson.repository;
-        } else if (packageJson.repository?.url) {
+        } else if (packageJson.repository?.url !== undefined) {
             repository = packageJson.repository.url;
         }
 

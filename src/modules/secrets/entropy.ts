@@ -76,7 +76,7 @@ export function findHighEntropyStrings(
         let match;
         while ((match = pattern.exec(content)) !== null) {
             const value = match[1];
-            if (value && isHighEntropy(value, threshold)) {
+            if (value !== undefined && value !== '' && isHighEntropy(value, threshold)) {
                 const entropy = calculateEntropy(value);
                 results.push({
                     value,

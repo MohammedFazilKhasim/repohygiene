@@ -43,7 +43,7 @@ export class SecretsAuditor extends BaseScanner<SecretsOptions, SecretsData> {
 
         // Report findings as issues
         for (const finding of findings) {
-            const severity = finding.entropy ? 'warning' : 'error';
+            const severity = finding.entropy !== undefined && finding.entropy > 0 ? 'warning' : 'error';
 
             this.addIssue({
                 severity,
