@@ -75,8 +75,9 @@ program
             // TODO: Run all scanners and collect results
             printSuccess('Repository scan complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
@@ -113,8 +114,9 @@ program
             // TODO: Implement CODEOWNERS scanner
             printSuccess('CODEOWNERS analysis complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
@@ -137,8 +139,9 @@ program
             // TODO: Implement license scanner
             printSuccess('License audit complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
@@ -161,8 +164,9 @@ program
             // TODO: Implement secrets scanner
             printSuccess('Secret scan complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
@@ -199,8 +203,9 @@ program
             // TODO: Implement branches scanner
             printSuccess('Branch analysis complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
@@ -223,8 +228,9 @@ program
             // TODO: Implement deps scanner
             printSuccess('Dependency analysis complete!');
 
-        } catch (error: unknown) {
-            printError(error instanceof Error ? error.message : 'Unknown error');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } catch (error: any) {
+            printError(error instanceof Error ? error.message : String(error));
             process.exit(1);
         }
     });
