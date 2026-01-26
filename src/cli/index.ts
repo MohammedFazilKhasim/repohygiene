@@ -13,7 +13,7 @@ import {
   printSuccess,
   printError,
   printSummary,
-  printModuleIssues,
+  printModuleIssues
 } from './ui/index.js';
 import {
   createCodeownersScanner,
@@ -80,7 +80,9 @@ program
       }
 
       // Run all scanners
-      printSuccess('Starting repository scan...');
+      if (!globalOpts.json) {
+        printSuccess('Starting repository scan...');
+      }
 
       const scanners = [
         createCodeownersScanner(gitContext, config, globalOpts),
@@ -90,11 +92,16 @@ program
         createDepsScanner(gitContext, config, globalOpts),
       ];
 
-      const results = await Promise.all(scanners.map((s) => s.execute()));
+      const results = await Promise.all(scanners.map(s => s.execute()));
 
-      printSummary(results);
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(results, null, 2));
+      } else {
+        printSummary(results);
+      }
 
-      const hasErrors = results.some((r) => r.status === 'failed');
+      const hasErrors = results.some(r => r.status === 'failed');
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (hasErrors && _options.failOn !== 'none') {
         process.exit(1);
@@ -140,8 +147,13 @@ program
       const scanner = createCodeownersScanner(gitContext, configResult.config, globalOpts);
       const result = await scanner.execute();
 
-      printModuleIssues(result);
-      printSummary([result]); // Show summary box for single module too
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        printModuleIssues(result);
+        printSummary([result]);
+      }
 
       if (result.status === 'failed') {
         process.exit(1);
@@ -175,8 +187,13 @@ program
       const scanner = createLicenseAuditor(gitContext, configResult.config, globalOpts);
       const result = await scanner.execute();
 
-      printModuleIssues(result);
-      printSummary([result]);
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        printModuleIssues(result);
+        printSummary([result]);
+      }
 
       if (result.status === 'failed') {
         process.exit(1);
@@ -210,8 +227,13 @@ program
       const scanner = createSecretsAuditor(gitContext, configResult.config, globalOpts);
       const result = await scanner.execute();
 
-      printModuleIssues(result);
-      printSummary([result]);
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        printModuleIssues(result);
+        printSummary([result]);
+      }
 
       if (result.status === 'failed') {
         process.exit(1);
@@ -257,8 +279,13 @@ program
       const scanner = createBranchesScanner(gitContext, configResult.config, globalOpts);
       const result = await scanner.execute();
 
-      printModuleIssues(result);
-      printSummary([result]);
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        printModuleIssues(result);
+        printSummary([result]);
+      }
 
       if (result.status === 'failed') {
         process.exit(1);
@@ -292,8 +319,13 @@ program
       const scanner = createDepsScanner(gitContext, configResult.config, globalOpts);
       const result = await scanner.execute();
 
-      printModuleIssues(result);
-      printSummary([result]);
+      if (globalOpts.json) {
+        // eslint-disable-next-line no-console
+        console.log(JSON.stringify(result, null, 2));
+      } else {
+        printModuleIssues(result);
+        printSummary([result]);
+      }
 
       if (result.status === 'failed') {
         process.exit(1);
