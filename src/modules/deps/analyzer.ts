@@ -42,7 +42,7 @@ interface NpmLsDependency {
 export async function checkOutdated(cwd: string): Promise<DependencyInfo[]> {
   try {
     // npm outdated exits with 1 if there are outdated packages
-    const { stdout } = await execAsync('npm outdated --json', { cwd });
+    const { stdout } = (await execAsync('npm outdated --json', { cwd })) as { stdout: string; stderr: string };
     return parseOutdated(stdout);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: unknown) {
@@ -86,7 +86,10 @@ function parseOutdated(json: string): DependencyInfo[] {
  */
 export async function checkDuplicates(cwd: string): Promise<DuplicateDependency[]> {
   try {
-    const { stdout } = await execAsync('npm ls --json --all', { cwd, maxBuffer: 10 * 1024 * 1024 });
+    const { stdout } = (await execAsync('npm ls --json --all', {
+      cwd,
+      maxBuffer: 10 * 1024 * 1024,
+    })) as { stdout: string; stderr: string };
     const tree = JSON.parse(stdout) as NpmLsResult;
 
     const versionMap = new Map<string, Set<string>>();
@@ -132,8 +135,8 @@ function traverseDependencies(
  */
 export async function analyzeDependencies(cwd: string): Promise<DepsData> {
   const [outdated, duplicates] = await Promise.all([
-    checkOutdated(cwd).catch(() => []),
-    checkDuplicates(cwd).catch(() => []),
+    checkOutdated(cwd).catch((): DependencyInfo[] => []),
+    checkDuplicates(cwd).catch((): DuplicateDependency[] => []),
   ]);
 
   return {
