@@ -6,7 +6,7 @@
 import { readFile } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
-import type { DependencyLicense, LicenseOptions } from '../../types/index.js';
+import type { DependencyLicense } from '../../types/index.js';
 
 const DEFAULT_ALLOWED = [
     'MIT',

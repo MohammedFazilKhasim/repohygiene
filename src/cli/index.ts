@@ -129,10 +129,9 @@ program
     .option('--deny <licenses>', 'Comma-separated denied licenses')
     .option('--fail-on <type>', 'Fail on: unknown, restricted, any', 'restricted')
     .option('--production', 'Only check production dependencies', true)
-    .action(async (_options, command) => {
+    .action((_options, command) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
-        const _cwd = globalOpts.cwd ?? process.cwd();
+        const _globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
 
         try {
             // TODO: Implement license scanner
@@ -154,10 +153,9 @@ program
     .option('--entropy-threshold <n>', 'Minimum entropy for detection', '4.5')
     .option('--exclude <patterns>', 'Glob patterns to exclude')
     .option('--include <patterns>', 'Glob patterns to include')
-    .action(async (_options, command) => {
+    .action((_options, command) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
-        const _cwd = globalOpts.cwd ?? process.cwd();
+        const _globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
 
         try {
             // TODO: Implement secrets scanner
@@ -217,10 +215,9 @@ program
     .option('--outdated', 'Check for outdated packages')
     .option('--duplicates', 'Find duplicate dependencies')
     .option('--circular', 'Detect circular dependencies')
-    .action(async (_options, command) => {
+    .action((_options, command) => {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
-        const _cwd = globalOpts.cwd ?? process.cwd();
+        const _globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
 
         try {
             // TODO: Implement deps scanner
@@ -239,7 +236,7 @@ program
     .command('init')
     .description('Generate a repohygiene.config.js file')
     .option('--format <type>', 'Config format: js, json, yaml', 'js')
-    .action(async (_options) => {
+    .action(() => {
         // TODO: Implement config generation
         printSuccess('Created repohygiene.config.js');
     });

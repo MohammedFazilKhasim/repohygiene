@@ -67,11 +67,11 @@ export async function getCommitLog(
         logOptions.push(`--since=${options.since}`);
     }
 
-    if (options?.maxCount) {
+    if (options?.maxCount !== undefined) {
         logOptions.push(`-n ${options.maxCount}`);
     }
 
-    if (path) {
+    if (path !== undefined) {
         logOptions.push('--', path);
     }
 
@@ -94,7 +94,7 @@ export async function getBranches(
     options?: { remote?: boolean }
 ): Promise<string[]> {
     const branchSummary = await ctx.git.branch([
-        options?.remote ? '-a' : '-l',
+        options?.remote === true ? '-a' : '-l',
         '--no-color',
     ]);
 
@@ -209,7 +209,7 @@ export async function getDefaultBranch(ctx: GitContext): Promise<string> {
         // Try to get from remote
         const remote = await ctx.git.remote(['show', 'origin']);
         const match = remote?.match(/HEAD branch: (.+)/);
-        if (match?.[1]) {
+        if (match?.[1] !== undefined) {
             return match[1].trim();
         }
     } catch {

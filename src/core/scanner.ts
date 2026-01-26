@@ -101,7 +101,7 @@ export abstract class BaseScanner<TOptions extends BaseModuleOptions, TData> {
      * Log verbose message if verbose mode is enabled
      */
     protected log(message: string): void {
-        if (this.options.verbose) {
+        if (this.options.verbose === true) {
             // Will be replaced with proper logger
             // eslint-disable-next-line no-console
             console.log(`[${this.name}] ${message}`);

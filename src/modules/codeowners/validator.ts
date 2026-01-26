@@ -52,7 +52,7 @@ export async function validateCodeowners(
         }
     }
 
-    if (!filePath) {
+    if (filePath === null) {
         issues.push({
             id: 'codeowners-missing',
             severity: 'warning',
@@ -64,7 +64,7 @@ export async function validateCodeowners(
         return { isValid: false, filePath: null, content: null, issues };
     }
 
-    if (content) {
+    if (content !== null && filePath !== null) {
         // Validate content
         const contentIssues = validateContent(content, filePath);
         issues.push(...contentIssues);
@@ -100,7 +100,7 @@ function validateContent(content: string, filePath: string): Issue[] {
         const path = parts[0];
         const owners = parts.slice(1);
 
-        if (!path) {
+        if (path === undefined || path === '') {
             continue;
         }
 

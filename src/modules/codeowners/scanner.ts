@@ -60,8 +60,8 @@ export class CodeownersScanner extends BaseScanner<CodeownersOptions, Codeowners
         });
 
         // Compare with existing
-        let conflicts: string[] = [];
-        if (validation.content) {
+        const conflicts: string[] = [];
+        if (validation.content !== null) {
             const existing = parseCodeowners(validation.content);
             const diffs = compareCodeowners(ownerships, existing, this.options.teamMappings);
 
