@@ -48,7 +48,7 @@ export async function checkOutdated(cwd: string): Promise<DependencyInfo[]> {
     } catch (error: any) {
         // If exit code is 1, it means outdated packages found (and stdout has json)
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.code === 1 && error.stdout) {
+        if (error.code === 1 && typeof error.stdout === 'string') {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
             return parseOutdated(error.stdout as string);
         }
@@ -104,7 +104,7 @@ export async function checkDuplicates(cwd: string): Promise<DuplicateDependency[
     }
 }
 
-function traverseDependencies(node: NpmLsResult | NpmLsDependency, map: Map<string, Set<string>>) {
+function traverseDependencies(node: NpmLsResult | NpmLsDependency, map: Map<string, Set<string>>): void {
     if (node.dependencies) {
         for (const [name, dep] of Object.entries(node.dependencies)) {
             if (!map.has(name)) {
