@@ -45,15 +45,21 @@ export async function checkOutdated(cwd: string): Promise<DependencyInfo[]> {
         const { stdout } = await execAsync('npm outdated --json', { cwd });
         return parseOutdated(stdout);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (e: unknown) {
+        const error = e as { code?: unknown; stdout?: unknown };
         // If exit code is 1, it means outdated packages found (and stdout has json)
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (error.code === 1 && typeof error.stdout === 'string') {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-            return parseOutdated(error.stdout as string);
+        if (
+            typeof error === 'object' &&
+            error !== null &&
+            'code' in error &&
+            error.code === 1 &&
+            'stdout' in error &&
+            typeof error.stdout === 'string'
+        ) {
+            return parseOutdated(error.stdout);
         }
         // If other error (e.g. npm not found), throw
-        throw error;
+        throw e;
     }
 }
 
