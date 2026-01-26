@@ -68,7 +68,7 @@ function parseOutdated(json: string): DependencyInfo[] {
 
   try {
     const result = JSON.parse(json) as NpmOutdatedResult;
-    return Object.entries(result).map(([name, info]) => ({
+    return Object.entries(result).map(([name, info]): DependencyInfo => ({
       name,
       version: info.current ?? 'unknown',
       latestVersion: info.latest,
