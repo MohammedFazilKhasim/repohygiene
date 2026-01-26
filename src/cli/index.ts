@@ -7,7 +7,21 @@ import chalk from 'chalk';
 import { loadConfig } from '../core/config.js';
 import { initGitContext } from '../core/git.js';
 import type { GlobalOptions } from '../types/index.js';
-import { printHeader, printHelpfulError, printSuccess, printError } from './ui/index.js';
+import {
+  printHeader,
+  printHelpfulError,
+  printSuccess,
+  printError,
+  printSummary,
+  printModuleIssues
+} from './ui/index.js';
+import {
+  createCodeownersScanner,
+  createLicenseAuditor,
+  createSecretsAuditor,
+  createBranchesScanner,
+  createDepsScanner,
+} from '../modules/index.js';
 
 // Get version from package.json
 const VERSION = '0.1.0';
@@ -45,7 +59,8 @@ program
 
     try {
       // Initialize
-      const [config, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+      const [configResult, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+      const config = configResult.config;
 
       if (!gitContext.isGitRepo) {
         printHelpfulError({
@@ -59,13 +74,31 @@ program
         process.exit(1);
       }
 
-      if (config.filepath !== null && globalOpts.json !== true) {
+      if (configResult.filepath !== null && globalOpts.json !== true) {
         // eslint-disable-next-line no-console
-        console.log(chalk.dim(`Using config: ${config.filepath}\n`));
+        console.log(chalk.dim(`Using config: ${configResult.filepath}\n`));
       }
 
-      // TODO: Run all scanners and collect results
-      printSuccess('Repository scan complete!');
+      // Run all scanners
+      printSuccess('Starting repository scan...');
+
+      const scanners = [
+        createCodeownersScanner(gitContext, config, globalOpts),
+        createLicenseAuditor(gitContext, config, globalOpts),
+        createSecretsAuditor(gitContext, config, globalOpts),
+        createBranchesScanner(gitContext, config, globalOpts),
+        createDepsScanner(gitContext, config, globalOpts),
+      ];
+
+      const results = await Promise.all(scanners.map(s => s.execute()));
+
+      printSummary(results);
+
+      const hasErrors = results.some(r => r.status === 'failed');
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (hasErrors && _options.failOn !== 'none') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -103,8 +136,16 @@ program
         process.exit(1);
       }
 
-      // TODO: Implement CODEOWNERS scanner
-      printSuccess('CODEOWNERS analysis complete!');
+      const configResult = await loadConfig(cwd);
+      const scanner = createCodeownersScanner(gitContext, configResult.config, globalOpts);
+      const result = await scanner.execute();
+
+      printModuleIssues(result);
+      printSummary([result]); // Show summary box for single module too
+
+      if (result.status === 'failed') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -123,12 +164,23 @@ program
   .option('--deny <licenses>', 'Comma-separated denied licenses')
   .option('--fail-on <type>', 'Fail on: unknown, restricted, any', 'restricted')
   .option('--production', 'Only check production dependencies', true)
-  .action((_options, _command) => {
+  .action(async (_options, command) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+    const cwd = globalOpts.cwd ?? process.cwd();
 
     try {
-      // TODO: Implement license scanner
-      printSuccess('License audit complete!');
+      const [configResult, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+
+      const scanner = createLicenseAuditor(gitContext, configResult.config, globalOpts);
+      const result = await scanner.execute();
+
+      printModuleIssues(result);
+      printSummary([result]);
+
+      if (result.status === 'failed') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -147,12 +199,23 @@ program
   .option('--entropy-threshold <n>', 'Minimum entropy for detection', '4.5')
   .option('--exclude <patterns>', 'Glob patterns to exclude')
   .option('--include <patterns>', 'Glob patterns to include')
-  .action((_options, _command) => {
+  .action(async (_options, command) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+    const cwd = globalOpts.cwd ?? process.cwd();
 
     try {
-      // TODO: Implement secrets scanner
-      printSuccess('Secret scan complete!');
+      const [configResult, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+
+      const scanner = createSecretsAuditor(gitContext, configResult.config, globalOpts);
+      const result = await scanner.execute();
+
+      printModuleIssues(result);
+      printSummary([result]);
+
+      if (result.status === 'failed') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -190,8 +253,16 @@ program
         process.exit(1);
       }
 
-      // TODO: Implement branches scanner
-      printSuccess('Branch analysis complete!');
+      const configResult = await loadConfig(cwd);
+      const scanner = createBranchesScanner(gitContext, configResult.config, globalOpts);
+      const result = await scanner.execute();
+
+      printModuleIssues(result);
+      printSummary([result]);
+
+      if (result.status === 'failed') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -210,12 +281,23 @@ program
   .option('--outdated', 'Check for outdated packages')
   .option('--duplicates', 'Find duplicate dependencies')
   .option('--circular', 'Detect circular dependencies')
-  .action((_options, _command) => {
+  .action(async (_options, command) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+    const cwd = globalOpts.cwd ?? process.cwd();
 
     try {
-      // TODO: Implement deps scanner
-      printSuccess('Dependency analysis complete!');
+      const [configResult, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+
+      const scanner = createDepsScanner(gitContext, configResult.config, globalOpts);
+      const result = await scanner.execute();
+
+      printModuleIssues(result);
+      printSummary([result]);
+
+      if (result.status === 'failed') {
+        process.exit(1);
+      }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -37,3 +37,9 @@ export {
   analyzeBranches,
   deleteBranches,
 } from './branches/index.js';
+
+// Dependencies module
+export {
+  DepsScanner,
+  createDepsScanner,
+} from './deps/index.js';
