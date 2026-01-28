@@ -42,7 +42,10 @@ interface NpmLsDependency {
 export async function checkOutdated(cwd: string): Promise<DependencyInfo[]> {
   try {
     // npm outdated exits with 1 if there are outdated packages
-    const { stdout } = (await execAsync('npm outdated --json', { cwd })) as { stdout: string; stderr: string };
+    const { stdout } = (await execAsync('npm outdated --json', { cwd })) as {
+      stdout: string;
+      stderr: string;
+    };
     return parseOutdated(stdout);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: unknown) {
@@ -68,14 +71,16 @@ function parseOutdated(json: string): DependencyInfo[] {
 
   try {
     const result = JSON.parse(json) as NpmOutdatedResult;
-    return Object.entries(result).map(([name, info]): DependencyInfo => ({
-      name,
-      version: info.current ?? 'unknown',
-      latestVersion: info.latest,
-      isOutdated: true,
-      isProduction: true, // npm outdated doesn't easily distinguish without more flags, assume true for now or refine
-      dependencies: [], // Not provided by outdated
-    }));
+    return Object.entries(result).map(
+      ([name, info]): DependencyInfo => ({
+        name,
+        version: info.current ?? 'unknown',
+        latestVersion: info.latest,
+        isOutdated: true,
+        isProduction: true, // npm outdated doesn't easily distinguish without more flags, assume true for now or refine
+        dependencies: [], // Not provided by outdated
+      })
+    );
   } catch {
     return [];
   }

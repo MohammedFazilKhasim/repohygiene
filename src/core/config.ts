@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: RepoHygieneConfig = {
       '*.test.ts',
       '**/*.test.ts',
       '*.spec.ts',
-      '**/*.spec.ts'
+      '**/*.spec.ts',
     ],
   },
   branches: {
