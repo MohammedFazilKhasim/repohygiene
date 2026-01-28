@@ -344,10 +344,102 @@ program
 program
   .command('init')
   .description('Generate a repohygiene.config.js file')
-  .option('--format <type>', 'Config format: js, json, yaml', 'js')
-  .action(() => {
-    // TODO: Implement config generation
-    printSuccess('Created repohygiene.config.js');
+  .option('--format <type>', 'Config format: js, json', 'js')
+  .option('--force', 'Overwrite existing config file')
+  .action(async (options) => {
+    const { promises: fs } = await import('fs');
+    const path = await import('path');
+    const cwd = process.cwd();
+
+    const configContent = `/**
+ * RepoHygiene Configuration
+ * Customize your repository hygiene checks
+ */
+export default {
+  // Directories to exclude from all scans
+  exclude: ['node_modules', 'dist', '.git', 'coverage'],
+
+  // CODEOWNERS settings
+  codeowners: {
+    threshold: 10,           // Min commits to be considered owner
+    output: '.github/CODEOWNERS',
+  },
+
+  // License policy
+  licenses: {
+    allow: ['MIT', 'Apache-2.0', 'BSD-3-Clause', 'ISC'],
+    deny: ['GPL-3.0', 'AGPL-3.0'],
+    failOn: 'restricted',
+  },
+
+  // Secret scanning
+  secrets: {
+    scanHistory: false,
+    entropyThreshold: 4.5,
+  },
+
+  // Branch cleanup
+  branches: {
+    staleDays: 90,
+    exclude: ['main', 'master', 'develop', 'release/*'],
+  },
+
+  // Dependency analysis
+  deps: {
+    outdated: true,
+    duplicates: true,
+  },
+};
+`;
+
+    const jsonContent = JSON.stringify(
+      {
+        exclude: ['node_modules', 'dist', '.git', 'coverage'],
+        codeowners: { threshold: 10, output: '.github/CODEOWNERS' },
+        licenses: {
+          allow: ['MIT', 'Apache-2.0', 'BSD-3-Clause', 'ISC'],
+          deny: ['GPL-3.0', 'AGPL-3.0'],
+          failOn: 'restricted',
+        },
+        secrets: { scanHistory: false, entropyThreshold: 4.5 },
+        branches: { staleDays: 90, exclude: ['main', 'master', 'develop'] },
+        deps: { outdated: true, duplicates: true },
+      },
+      null,
+      2
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const isJson = options.format === 'json';
+    const filename = isJson ? '.repohygienerc.json' : 'repohygiene.config.js';
+    const filepath = path.join(cwd, filename);
+
+    try {
+      // Check if file exists
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (!options.force) {
+        try {
+          await fs.access(filepath);
+          printError(`Config file already exists: ${filename}. Use --force to overwrite.`);
+          process.exit(1);
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_e) {
+          // File doesn't exist, continue
+        }
+      }
+
+      await fs.writeFile(filepath, isJson ? jsonContent : configContent, 'utf-8');
+      printSuccess(`Created ${filename}`);
+      // eslint-disable-next-line no-console
+      console.log(chalk.dim('\nNext steps:'));
+      // eslint-disable-next-line no-console
+      console.log(chalk.dim('  1. Edit the config file to match your project'));
+      // eslint-disable-next-line no-console
+      console.log(chalk.dim('  2. Run: repohygiene scan'));
+    } catch (error) {
+      printError(error instanceof Error ? error.message : String(error));
+      process.exit(1);
+    }
   });
 
 // Parse and run

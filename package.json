@@ -31,13 +31,29 @@
         "branches",
         "dependencies",
         "cli",
-        "devtools"
+        "devtools",
+        "security",
+        "code-quality",
+        "github",
+        "automation",
+        "developer-tools",
+        "linting",
+        "code-review",
+        "repository-management",
+        "git-tools",
+        "secret-scanner",
+        "license-checker",
+        "branch-cleanup"
     ],
     "author": "MohammedFazilKhasim <siddiqmohammed697@gmail.com>",
     "license": "MIT",
     "repository": {
         "type": "git",
-        "url": ""
+        "url": "https://github.com/MohammedFazilKhasim/repohygiene"
+    },
+    "homepage": "https://github.com/MohammedFazilKhasim/repohygiene#readme",
+    "bugs": {
+        "url": "https://github.com/MohammedFazilKhasim/repohygiene/issues"
     },
     "engines": {
         "node": ">=18.0.0"
