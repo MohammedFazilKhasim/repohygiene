@@ -417,7 +417,7 @@ export default {
     try {
       // Check if file exists
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (!options.force) {
+      if (options.force !== true) {
         try {
           await fs.access(filepath);
           printError(`Config file already exists: ${filename}. Use --force to overwrite.`);
