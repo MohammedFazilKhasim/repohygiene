@@ -103,7 +103,7 @@ export function generateMarkdownReport(data: ReportData): string {
 
         for (const item of section.items) {
             lines.push(`- ${severityEmoji(item.severity)} ${item.message}`);
-            if (item.details) {
+            if (item.details !== undefined && item.details !== '') {
                 lines.push(`  - ${item.details}`);
             }
         }
@@ -189,7 +189,7 @@ export function createReportData(
  */
 export function generateHtmlReport(markdown: string): string {
     // Simple markdown to HTML conversion for basic elements
-    let html = markdown
+    const html = markdown
         // Headers
         .replace(/^### (.*$)/gm, '<h3>$1</h3>')
         .replace(/^## (.*$)/gm, '<h2>$1</h2>')

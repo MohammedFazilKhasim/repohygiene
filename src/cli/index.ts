@@ -22,11 +22,8 @@ import {
   createBranchesScanner,
   createDepsScanner,
 } from '../modules/index.js';
-import {
-  generateSarif,
-  writeSarifFile,
-  createSarifResult,
-} from './sarif.js';
+// SARIF imports reserved for future --output sarif flag
+// import { generateSarif, writeSarifFile, createSarifResult } from './sarif.js';
 import {
   generateMarkdownReport,
   writeMarkdownReport,
@@ -465,14 +462,14 @@ program
   .option('--install', 'Install pre-commit and pre-push hooks')
   .option('--uninstall', 'Remove installed hooks')
   .option('--status', 'Show current hook status')
-  .action(async (options, command) => {
+  .action((options, command) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
     const cwd = globalOpts.cwd ?? process.cwd();
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if (options.install) {
+      if (options.install === true) {
         const results = installAllHooks(cwd);
         for (const { hook, result } of results) {
           if (result.success) {
@@ -482,7 +479,7 @@ program
           }
         }
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      } else if (options.uninstall) {
+      } else if (options.uninstall === true) {
         const results = uninstallAllHooks(cwd);
         for (const { hook, result } of results) {
           if (result.success) {

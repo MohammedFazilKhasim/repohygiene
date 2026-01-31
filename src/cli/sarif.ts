@@ -377,8 +377,7 @@ export function depsToSarif(
         const ruleId = `deps/${dep.type}`;
         return createSarifResult(
             ruleId,
-            dep.message ??
-            `${dep.package}@${dep.currentVersion} is ${dep.type}${dep.latestVersion ? ` (latest: ${dep.latestVersion})` : ''}`,
+            (dep.message !== undefined && dep.message !== '') ? dep.message : `${dep.package}@${dep.currentVersion ?? 'unknown'} is ${dep.type}${dep.latestVersion !== undefined ? ` (latest: ${dep.latestVersion})` : ''}`,
             { uri: 'package.json' }
         );
     });
