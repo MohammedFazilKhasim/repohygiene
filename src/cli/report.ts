@@ -7,210 +7,210 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export interface ReportSection {
-    title: string;
-    status: 'passed' | 'warning' | 'failed';
-    items: Array<{
-        severity: 'error' | 'warning' | 'info';
-        message: string;
-        details?: string;
-    }>;
+  title: string;
+  status: 'passed' | 'warning' | 'failed';
+  items: Array<{
+    severity: 'error' | 'warning' | 'info';
+    message: string;
+    details?: string;
+  }>;
 }
 
 export interface ReportData {
-    repoName: string;
-    scanDate: Date;
-    sections: ReportSection[];
-    summary: {
-        totalIssues: number;
-        errors: number;
-        warnings: number;
-        info: number;
-    };
+  repoName: string;
+  scanDate: Date;
+  sections: ReportSection[];
+  summary: {
+    totalIssues: number;
+    errors: number;
+    warnings: number;
+    info: number;
+  };
 }
 
 /**
  * Generate status emoji based on status
  */
 function statusEmoji(status: 'passed' | 'warning' | 'failed'): string {
-    switch (status) {
-        case 'passed':
-            return '✅';
-        case 'warning':
-            return '⚠️';
-        case 'failed':
-            return '❌';
-    }
+  switch (status) {
+    case 'passed':
+      return '✅';
+    case 'warning':
+      return '⚠️';
+    case 'failed':
+      return '❌';
+  }
 }
 
 /**
  * Generate severity emoji
  */
 function severityEmoji(severity: 'error' | 'warning' | 'info'): string {
-    switch (severity) {
-        case 'error':
-            return '🔴';
-        case 'warning':
-            return '🟡';
-        case 'info':
-            return '🔵';
-    }
+  switch (severity) {
+    case 'error':
+      return '🔴';
+    case 'warning':
+      return '🟡';
+    case 'info':
+      return '🔵';
+  }
 }
 
 /**
  * Generate markdown report from scan data
  */
 export function generateMarkdownReport(data: ReportData): string {
-    const lines: string[] = [];
+  const lines: string[] = [];
 
-    // Header
-    lines.push('# 🧹 RepoHygiene Report');
-    lines.push('');
-    lines.push(`**Repository:** ${data.repoName}`);
-    lines.push(`**Scan Date:** ${data.scanDate.toISOString().split('T')[0]}`);
+  // Header
+  lines.push('# 🧹 RepoHygiene Report');
+  lines.push('');
+  lines.push(`**Repository:** ${data.repoName}`);
+  lines.push(`**Scan Date:** ${data.scanDate.toISOString().split('T')[0]}`);
+  lines.push('');
+
+  // Summary
+  lines.push('## 📊 Summary');
+  lines.push('');
+  lines.push('| Metric | Count |');
+  lines.push('|--------|-------|');
+  lines.push(`| Total Issues | ${data.summary.totalIssues} |`);
+  lines.push(`| 🔴 Errors | ${data.summary.errors} |`);
+  lines.push(`| 🟡 Warnings | ${data.summary.warnings} |`);
+  lines.push(`| 🔵 Info | ${data.summary.info} |`);
+  lines.push('');
+
+  // Quick Status
+  lines.push('## 🔍 Quick Status');
+  lines.push('');
+  lines.push('| Check | Status |');
+  lines.push('|-------|--------|');
+  for (const section of data.sections) {
+    lines.push(`| ${section.title} | ${statusEmoji(section.status)} ${section.status} |`);
+  }
+  lines.push('');
+
+  // Detailed Sections
+  for (const section of data.sections) {
+    lines.push(`## ${statusEmoji(section.status)} ${section.title}`);
     lines.push('');
 
-    // Summary
-    lines.push('## 📊 Summary');
-    lines.push('');
-    lines.push('| Metric | Count |');
-    lines.push('|--------|-------|');
-    lines.push(`| Total Issues | ${data.summary.totalIssues} |`);
-    lines.push(`| 🔴 Errors | ${data.summary.errors} |`);
-    lines.push(`| 🟡 Warnings | ${data.summary.warnings} |`);
-    lines.push(`| 🔵 Info | ${data.summary.info} |`);
-    lines.push('');
-
-    // Quick Status
-    lines.push('## 🔍 Quick Status');
-    lines.push('');
-    lines.push('| Check | Status |');
-    lines.push('|-------|--------|');
-    for (const section of data.sections) {
-        lines.push(`| ${section.title} | ${statusEmoji(section.status)} ${section.status} |`);
-    }
-    lines.push('');
-
-    // Detailed Sections
-    for (const section of data.sections) {
-        lines.push(`## ${statusEmoji(section.status)} ${section.title}`);
-        lines.push('');
-
-        if (section.items.length === 0) {
-            lines.push('No issues found. ✨');
-            lines.push('');
-            continue;
-        }
-
-        for (const item of section.items) {
-            lines.push(`- ${severityEmoji(item.severity)} ${item.message}`);
-            if (item.details !== undefined && item.details !== '') {
-                lines.push(`  - ${item.details}`);
-            }
-        }
-        lines.push('');
+    if (section.items.length === 0) {
+      lines.push('No issues found. ✨');
+      lines.push('');
+      continue;
     }
 
-    // Footer
-    lines.push('---');
+    for (const item of section.items) {
+      lines.push(`- ${severityEmoji(item.severity)} ${item.message}`);
+      if (item.details !== undefined && item.details !== '') {
+        lines.push(`  - ${item.details}`);
+      }
+    }
     lines.push('');
-    lines.push('*Generated by [RepoHygiene](https://github.com/MohammedFazilKhasim/repohygiene)*');
-    lines.push('');
+  }
 
-    return lines.join('\n');
+  // Footer
+  lines.push('---');
+  lines.push('');
+  lines.push('*Generated by [RepoHygiene](https://github.com/MohammedFazilKhasim/repohygiene)*');
+  lines.push('');
+
+  return lines.join('\n');
 }
 
 /**
  * Write markdown report to file
  */
 export function writeMarkdownReport(report: string, outputPath: string): void {
-    const dir = path.dirname(outputPath);
-    if (dir !== '.' && !fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(outputPath, report, 'utf-8');
+  const dir = path.dirname(outputPath);
+  if (dir !== '.' && !fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  fs.writeFileSync(outputPath, report, 'utf-8');
 }
 
 /**
  * Create report data from scan results
  */
 export function createReportData(
-    repoName: string,
-    results: Array<{
-        module: string;
-        status: 'passed' | 'warning' | 'failed';
-        issues: Array<{
-            severity: 'error' | 'warning' | 'info';
-            message: string;
-            details?: string;
-        }>;
-    }>
+  repoName: string,
+  results: Array<{
+    module: string;
+    status: 'passed' | 'warning' | 'failed';
+    issues: Array<{
+      severity: 'error' | 'warning' | 'info';
+      message: string;
+      details?: string;
+    }>;
+  }>
 ): ReportData {
-    const sections: ReportSection[] = results.map((r) => ({
-        title: r.module,
-        status: r.status,
-        items: r.issues,
-    }));
+  const sections: ReportSection[] = results.map((r) => ({
+    title: r.module,
+    status: r.status,
+    items: r.issues,
+  }));
 
-    let errors = 0;
-    let warnings = 0;
-    let info = 0;
+  let errors = 0;
+  let warnings = 0;
+  let info = 0;
 
-    for (const section of sections) {
-        for (const item of section.items) {
-            switch (item.severity) {
-                case 'error':
-                    errors++;
-                    break;
-                case 'warning':
-                    warnings++;
-                    break;
-                case 'info':
-                    info++;
-                    break;
-            }
-        }
+  for (const section of sections) {
+    for (const item of section.items) {
+      switch (item.severity) {
+        case 'error':
+          errors++;
+          break;
+        case 'warning':
+          warnings++;
+          break;
+        case 'info':
+          info++;
+          break;
+      }
     }
+  }
 
-    return {
-        repoName,
-        scanDate: new Date(),
-        sections,
-        summary: {
-            totalIssues: errors + warnings + info,
-            errors,
-            warnings,
-            info,
-        },
-    };
+  return {
+    repoName,
+    scanDate: new Date(),
+    sections,
+    summary: {
+      totalIssues: errors + warnings + info,
+      errors,
+      warnings,
+      info,
+    },
+  };
 }
 
 /**
  * Generate HTML report from markdown
  */
 export function generateHtmlReport(markdown: string): string {
-    // Simple markdown to HTML conversion for basic elements
-    const html = markdown
-        // Headers
-        .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-        .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-        .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-        // Bold
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Italics
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        // Links
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
-        // Lists
-        .replace(/^- (.*$)/gm, '<li>$1</li>')
-        // Horizontal rule
-        .replace(/^---$/gm, '<hr>')
-        // Paragraphs
-        .replace(/\n\n/g, '</p><p>')
-        // Tables (basic)
-        .replace(/\|/g, '</td><td>')
-        .replace(/^<\/td><td>(.*)<td>$/gm, '<tr><td>$1</tr>');
+  // Simple markdown to HTML conversion for basic elements
+  const html = markdown
+    // Headers
+    .replace(/^### (.*$)/gm, '<h3>$1</h3>')
+    .replace(/^## (.*$)/gm, '<h2>$1</h2>')
+    .replace(/^# (.*$)/gm, '<h1>$1</h1>')
+    // Bold
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // Italics
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    // Links
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+    // Lists
+    .replace(/^- (.*$)/gm, '<li>$1</li>')
+    // Horizontal rule
+    .replace(/^---$/gm, '<hr>')
+    // Paragraphs
+    .replace(/\n\n/g, '</p><p>')
+    // Tables (basic)
+    .replace(/\|/g, '</td><td>')
+    .replace(/^<\/td><td>(.*)<td>$/gm, '<tr><td>$1</tr>');
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html>
 <head>
   <title>RepoHygiene Report</title>

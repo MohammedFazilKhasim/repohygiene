@@ -24,16 +24,8 @@ import {
 } from '../modules/index.js';
 // SARIF imports reserved for future --output sarif flag
 // import { generateSarif, writeSarifFile, createSarifResult } from './sarif.js';
-import {
-  generateMarkdownReport,
-  writeMarkdownReport,
-  createReportData,
-} from './report.js';
-import {
-  installAllHooks,
-  uninstallAllHooks,
-  getHooksStatus,
-} from './hooks.js';
+import { generateMarkdownReport, writeMarkdownReport, createReportData } from './report.js';
+import { installAllHooks, uninstallAllHooks, getHooksStatus } from './hooks.js';
 
 // Get version from package.json
 const VERSION = '0.1.0';
@@ -548,11 +540,12 @@ program
       const reportResults = results.map((r) => ({
         module: r.module,
         status: r.status as 'passed' | 'warning' | 'failed',
-        issues: r.issues?.map((i) => ({
-          severity: (i.severity ?? 'info') as 'error' | 'warning' | 'info',
-          message: i.message ?? '',
-          details: i.suggestion,
-        })) ?? [],
+        issues:
+          r.issues?.map((i) => ({
+            severity: (i.severity ?? 'info') as 'error' | 'warning' | 'info',
+            message: i.message ?? '',
+            details: i.suggestion,
+          })) ?? [],
       }));
 
       const repoName = gitContext.rootDir?.split(/[\\/]/).pop() ?? 'unknown';
@@ -563,7 +556,6 @@ program
       const outputPath = options.output as string;
       writeMarkdownReport(markdown, outputPath);
       printSuccess(`Report generated: ${outputPath}`);
-
     } catch (error) {
       printError(error instanceof Error ? error.message : String(error));
       process.exit(1);
