@@ -22,6 +22,21 @@ import {
   createBranchesScanner,
   createDepsScanner,
 } from '../modules/index.js';
+import {
+  generateSarif,
+  writeSarifFile,
+  createSarifResult,
+} from './sarif.js';
+import {
+  generateMarkdownReport,
+  writeMarkdownReport,
+  createReportData,
+} from './report.js';
+import {
+  installAllHooks,
+  uninstallAllHooks,
+  getHooksStatus,
+} from './hooks.js';
 
 // Get version from package.json
 const VERSION = '0.1.0';
@@ -436,6 +451,122 @@ export default {
       console.log(chalk.dim('  1. Edit the config file to match your project'));
       // eslint-disable-next-line no-console
       console.log(chalk.dim('  2. Run: repohygiene scan'));
+    } catch (error) {
+      printError(error instanceof Error ? error.message : String(error));
+      process.exit(1);
+    }
+  });
+// ============================================================================
+// HOOKS Command - Install/manage git hooks
+// ============================================================================
+program
+  .command('hooks')
+  .description('Install or manage git hooks for automated scanning')
+  .option('--install', 'Install pre-commit and pre-push hooks')
+  .option('--uninstall', 'Remove installed hooks')
+  .option('--status', 'Show current hook status')
+  .action(async (options, command) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+    const cwd = globalOpts.cwd ?? process.cwd();
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (options.install) {
+        const results = installAllHooks(cwd);
+        for (const { hook, result } of results) {
+          if (result.success) {
+            printSuccess(`${hook}: ${result.message}`);
+          } else {
+            printError(`${hook}: ${result.message}`);
+          }
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      } else if (options.uninstall) {
+        const results = uninstallAllHooks(cwd);
+        for (const { hook, result } of results) {
+          if (result.success) {
+            printSuccess(`${hook}: ${result.message}`);
+          } else {
+            printError(`${hook}: ${result.message}`);
+          }
+        }
+      } else {
+        // Default: show status
+        const status = getHooksStatus(cwd);
+        // eslint-disable-next-line no-console
+        console.log(chalk.bold('\nGit Hooks Status:'));
+        for (const { hook, installed } of status) {
+          const emoji = installed ? '✅' : '❌';
+          // eslint-disable-next-line no-console
+          console.log(`  ${emoji} ${hook}: ${installed ? 'installed' : 'not installed'}`);
+        }
+        // eslint-disable-next-line no-console
+        console.log(chalk.dim('\nUse --install to add hooks or --uninstall to remove them.'));
+      }
+    } catch (error) {
+      printError(error instanceof Error ? error.message : String(error));
+      process.exit(1);
+    }
+  });
+
+// ============================================================================
+// REPORT Command - Generate markdown/HTML reports
+// ============================================================================
+program
+  .command('report')
+  .description('Generate a markdown or HTML report of scan results')
+  .option('--format <type>', 'Output format: markdown, html', 'markdown')
+  .option('--output <path>', 'Output file path', 'HYGIENE_REPORT.md')
+  .action(async (options, command) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+    const globalOpts = (command.parent?.opts() ?? {}) as GlobalOptions;
+    const cwd = globalOpts.cwd ?? process.cwd();
+
+    try {
+      const [configResult, gitContext] = await Promise.all([loadConfig(cwd), initGitContext(cwd)]);
+      const config = configResult.config;
+
+      if (!gitContext.isGitRepo) {
+        printHelpfulError({
+          title: 'Not a Git Repository',
+          message: 'Report generation requires a git repository.',
+          suggestions: ['Navigate to your project root'],
+        });
+        process.exit(1);
+      }
+
+      // Run all scanners
+      const scanners = [
+        createCodeownersScanner(gitContext, config, globalOpts),
+        createLicenseAuditor(gitContext, config, globalOpts),
+        createSecretsAuditor(gitContext, config, globalOpts),
+        createBranchesScanner(gitContext, config, globalOpts),
+        createDepsScanner(gitContext, config, globalOpts),
+      ];
+
+      const results = await Promise.all(scanners.map((s) => s.execute()));
+
+      // Convert to report format
+      const reportResults = results.map((r) => ({
+        module: r.module,
+        status: r.status as 'passed' | 'warning' | 'failed',
+        issues: r.issues?.map((i) => ({
+          severity: (i.severity ?? 'info') as 'error' | 'warning' | 'info',
+          message: i.message ?? '',
+          details: i.suggestion,
+        })) ?? [],
+      }));
+
+      const repoName = gitContext.rootDir?.split(/[\\/]/).pop() ?? 'unknown';
+      const reportData = createReportData(repoName, reportResults);
+      const markdown = generateMarkdownReport(reportData);
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      const outputPath = options.output as string;
+      writeMarkdownReport(markdown, outputPath);
+      printSuccess(`Report generated: ${outputPath}`);
+
     } catch (error) {
       printError(error instanceof Error ? error.message : String(error));
       process.exit(1);

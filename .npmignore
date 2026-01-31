@@ -1,0 +1,24 @@
+# Ignore everything by default
+*
+
+# But include these files
+!dist/**
+!package.json
+!README.md
+!CHANGELOG.md
+!LICENSE
+
+# Exclude test and dev files
+node_modules/
+tests/
+coverage/
+.github/
+.vscode/
+*.test.ts
+*.spec.ts
+vitest.config.ts
+tsconfig.json
+tsup.config.ts
+.eslintrc*
+.prettierrc*
+.gitignore

@@ -8,6 +8,10 @@
         "repohygiene": "dist/cli/index.js",
         "rh": "dist/cli/index.js"
     },
+    "publishConfig": {
+        "access": "public",
+        "registry": "https://registry.npmjs.org/"
+    },
     "scripts": {
         "dev": "tsup --watch",
         "build": "tsup",

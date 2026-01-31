@@ -50,6 +50,9 @@ Managing a repository involves many boring but essential tasks:
 | 🔑 **Secret Scanner** | Detect leaked secrets with 40+ patterns + entropy analysis |
 | 🌿 **Branch Cleanup** | Find and remove stale branches safely |
 | 📦 **Dependency Analysis** | Check for outdated, duplicate, and circular deps |
+| 📊 **SARIF Output** | Generate reports for GitHub Security tab integration |
+| 🪝 **Git Hooks** | Auto-install pre-commit and pre-push scanning hooks |
+| 📝 **Reports** | Export scan results to beautiful markdown reports |
 
 ---
 
