@@ -1,24 +1,40 @@
 # RepoHygiene
 
-> One CLI to rule all your repo maintenance
+> **All-in-one repository maintenance CLI** — CODEOWNERS generator, license checker, secret scanner, branch cleaner, and dependency analyzer.
 
 [![npm version](https://img.shields.io/npm/v/repohygiene.svg)](https://www.npmjs.com/package/repohygiene)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.4-blue.svg)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-%3E%3D18-green.svg)](https://nodejs.org/)
 
-RepoHygiene is a comprehensive repository maintenance toolkit that combines **CODEOWNERS generation**, **license auditing**, **secret scanning**, **branch cleanup**, and **dependency analysis** into a single, fast CLI.
+**RepoHygiene** is a fast, zero-config CLI tool that automates repository maintenance tasks. Stop juggling multiple tools — scan for **leaked secrets**, audit **open source licenses**, generate **CODEOWNERS files**, clean up **stale git branches**, and analyze **npm dependencies** with a single command.
+
+<!-- SEO Keywords: git secret scanner, codeowners generator, license audit tool, branch cleanup, dependency checker, repository maintenance, devops tools, npm security scanner, eslint alternative, pre-commit hooks, CI/CD security, open source compliance -->
+
+## Why RepoHygiene?
+
+| Problem | Solution |
+|---------|----------|
+| Accidentally committed secrets? | Scans 40+ secret patterns + entropy detection |
+| Need to generate CODEOWNERS? | Auto-generates from git history |
+| License compliance headaches? | Audits all dependencies against allow/deny lists |
+| Too many stale branches? | Identifies and safely deletes them |
+| Outdated packages? | Finds outdated and duplicate dependencies |
 
 ## Installation
 
 ```bash
+# npm
 npm install -g repohygiene
-```
 
-Or run directly with npx:
-
-```bash
+# npx (no install)
 npx repohygiene scan
+
+# pnpm
+pnpm add -g repohygiene
+
+# yarn
+yarn global add repohygiene
 ```
 
 ## Quick Start
@@ -27,8 +43,6 @@ npx repohygiene scan
 cd your-project
 repohygiene scan
 ```
-
-Output:
 
 ```
 ╭─────────────────────────────────────────────╮
@@ -44,81 +58,75 @@ Output:
 
 ## Features
 
-| Feature | Description |
-|---------|-------------|
-| **CODEOWNERS** | Generate and validate CODEOWNERS from git history |
-| **License Audit** | Scan dependencies for license compliance |
-| **Secret Scanner** | Detect 40+ secret patterns with entropy analysis |
-| **Branch Cleanup** | Find and remove stale branches safely |
-| **Dependency Analysis** | Check for outdated and duplicate packages |
-| **SARIF Output** | Export to GitHub Security tab format |
-| **Git Hooks** | Pre-commit and pre-push scanning |
-| **Reports** | Generate markdown scan reports |
-
-## Commands
-
-### Scan Everything
-
-```bash
-repohygiene scan
-repohygiene scan --json              # JSON output
-repohygiene scan --fail-on error     # Fail CI on errors
-```
-
-### CODEOWNERS
-
-```bash
-repohygiene codeowners --analyze     # Analyze git history
-repohygiene codeowners --generate    # Generate CODEOWNERS file
-repohygiene codeowners --validate    # Validate existing file
-```
-
-### License Audit
-
-```bash
-repohygiene licenses
-repohygiene licenses --production    # Production deps only
-```
-
-### Secret Scanner
+### 🔑 Secret Scanner
+Detect leaked API keys, tokens, and credentials before they reach production.
+- 40+ built-in patterns (AWS, GitHub, Stripe, Slack, etc.)
+- Entropy-based detection for custom secrets
+- Git history scanning
 
 ```bash
 repohygiene secrets
-repohygiene secrets --scan-git-history   # Include git history
+repohygiene secrets --scan-git-history
 ```
 
-Detects: AWS keys, GitHub tokens, Stripe keys, database URLs, private keys, and 40+ more patterns.
-
-### Branch Cleanup
+### 🔐 CODEOWNERS Generator
+Automatically generate CODEOWNERS from git commit history.
 
 ```bash
-repohygiene branches                  # List stale branches
-repohygiene branches --delete         # Delete stale branches
-repohygiene branches --merged-only    # Only merged branches
+repohygiene codeowners --generate
+repohygiene codeowners --validate
 ```
 
-### Dependency Analysis
+### 📜 License Audit
+Scan npm dependencies for license compliance. Block GPL, AGPL, or any license you specify.
 
 ```bash
-repohygiene deps
-repohygiene deps --outdated           # Check for updates
-repohygiene deps --duplicates         # Find duplicates
+repohygiene licenses
+repohygiene licenses --production
 ```
 
-### Git Hooks
+### 🌿 Branch Cleanup
+Find and remove stale, merged, or abandoned branches.
 
 ```bash
-repohygiene hooks --install           # Install pre-commit hooks
-repohygiene hooks --uninstall         # Remove hooks
-repohygiene hooks --status            # Check hook status
+repohygiene branches
+repohygiene branches --delete --merged-only
 ```
 
-### Generate Report
+### 📦 Dependency Analysis
+Check for outdated packages, duplicates, and circular dependencies.
 
 ```bash
-repohygiene report                    # Create HYGIENE_REPORT.md
-repohygiene report --output report.md # Custom output path
+repohygiene deps --outdated --duplicates
 ```
+
+### 🪝 Git Hooks
+Auto-install pre-commit hooks to scan for secrets before every commit.
+
+```bash
+repohygiene hooks --install
+```
+
+### 📝 Markdown Reports
+Generate shareable hygiene reports for your team.
+
+```bash
+repohygiene report --output HYGIENE_REPORT.md
+```
+
+## All Commands
+
+| Command | Description |
+|---------|-------------|
+| `repohygiene scan` | Run all checks |
+| `repohygiene secrets` | Scan for leaked secrets |
+| `repohygiene licenses` | Audit dependency licenses |
+| `repohygiene codeowners` | Generate/validate CODEOWNERS |
+| `repohygiene branches` | Find stale branches |
+| `repohygiene deps` | Analyze dependencies |
+| `repohygiene hooks` | Manage git hooks |
+| `repohygiene report` | Generate markdown report |
+| `repohygiene init` | Create config file |
 
 ## Configuration
 
@@ -128,9 +136,9 @@ Create `repohygiene.config.js` or run `repohygiene init`:
 export default {
   exclude: ['node_modules', 'dist', '.git'],
 
-  codeowners: {
-    threshold: 10,
-    output: '.github/CODEOWNERS',
+  secrets: {
+    entropyThreshold: 4.5,
+    scanHistory: false,
   },
 
   licenses: {
@@ -138,19 +146,9 @@ export default {
     deny: ['GPL-3.0', 'AGPL-3.0'],
   },
 
-  secrets: {
-    entropyThreshold: 4.5,
-    scanHistory: false,
-  },
-
   branches: {
     staleDays: 90,
     exclude: ['main', 'master', 'develop'],
-  },
-
-  deps: {
-    outdated: true,
-    duplicates: true,
   },
 };
 ```
@@ -160,21 +158,7 @@ export default {
 ### GitHub Actions
 
 ```yaml
-name: Repo Hygiene
-on: [push, pull_request]
-
-jobs:
-  hygiene:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: npm ci
-      - run: npx repohygiene scan --fail-on error
+- run: npx repohygiene scan --fail-on error
 ```
 
 ### Pre-commit Hook
@@ -183,31 +167,42 @@ jobs:
 repohygiene hooks --install
 ```
 
-Or manually with Husky:
+## Use Cases
 
-```bash
-# .husky/pre-commit
-npx repohygiene secrets
-```
+- **Security teams**: Prevent secret leaks in CI/CD pipelines
+- **Open source maintainers**: Ensure license compliance
+- **DevOps engineers**: Automate branch cleanup
+- **Engineering managers**: Generate CODEOWNERS automatically
+- **Developers**: Keep dependencies up to date
+
+## Comparison
+
+| Feature | RepoHygiene | git-secrets | license-checker | codeowners |
+|---------|-------------|-------------|-----------------|------------|
+| Secret scanning | ✅ | ✅ | ❌ | ❌ |
+| License audit | ✅ | ❌ | ✅ | ❌ |
+| CODEOWNERS | ✅ | ❌ | ❌ | ✅ |
+| Branch cleanup | ✅ | ❌ | ❌ | ❌ |
+| Dependency analysis | ✅ | ❌ | ❌ | ❌ |
+| Single CLI | ✅ | ❌ | ❌ | ❌ |
 
 ## Security
 
-- Runs entirely locally — no data leaves your machine
-- No external API calls
-- Open source and auditable
-
-Found a security issue? Email [siddiqmohammed697@gmail.com](mailto:siddiqmohammed697@gmail.com).
+- **100% local** — no data leaves your machine
+- **Zero network calls** — works offline
+- **Open source** — fully auditable
 
 ## Contributing
 
 ```bash
 git clone https://github.com/MohammedFazilKhasim/repohygiene.git
-cd repohygiene
-npm install
-npm test
-npm run build
+npm install && npm test
 ```
 
 ## License
 
 MIT © [MohammedFazilKhasim](https://github.com/MohammedFazilKhasim)
+
+---
+
+**Keywords**: secret scanner, git secrets, codeowners generator, license checker, license audit, branch cleanup, stale branches, dependency analyzer, repository maintenance, npm security, devops tools, pre-commit hooks, CI/CD security, open source compliance, TypeScript CLI
